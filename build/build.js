@@ -1,13 +1,42 @@
 var gui = new dat.GUI();
 var params = {
-    Ellipse_Size: 30,
+    Seed: 0,
+    Long: -30,
     Download_Image: function () { return save(); },
 };
-gui.add(params, "Ellipse_Size", 0, 100, 1);
+gui.add(params, "Seed", 0, 255, 1);
+gui.add(params, "Long", -100, 0, 1);
 gui.add(params, "Download_Image");
+function smallLine() {
+    line(0, 0, 0, params.Long);
+}
+function divisePlant(stop) {
+    push();
+    var maxI = random(0, 3);
+    for (var i = 0; i < maxI; i++) {
+        push();
+        var angle = random(-PI / 8, PI / 8);
+        rotate(angle);
+        smallLine();
+        translate(0, params.Long);
+        if (stop > 1) {
+            push();
+            stop--;
+            divisePlant(stop);
+            pop();
+        }
+        pop();
+    }
+    pop();
+}
 function draw() {
-    background(0);
-    ellipse(mouseX, mouseY, params.Ellipse_Size);
+    randomSeed(params.Seed);
+    background("#F4EAD3");
+    noFill();
+    stroke("#136428");
+    translate(width / 2, 4 * height / 5);
+    push();
+    divisePlant(15);
 }
 function setup() {
     p6_CreateCanvas();
