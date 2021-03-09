@@ -1,65 +1,102 @@
+var paper;
 var gui = new dat.GUI();
 var params = {
-    Seed: 0,
-    Long: -30,
-    Angle: 0.39,
+    Seed: 124,
+    Long: -48,
+    Angle: 0.77,
+    PousseArbre: 5,
     Download_Image: function () { return save(); },
 };
 gui.add(params, "Seed", 0, 255, 1);
-gui.add(params, "Long", -1000, 0, 1);
+gui.add(params, "Long", -150, 0, 1);
 gui.add(params, "Angle", 0, 1.7, 0.001);
+gui.add(params, "PousseArbre", 0, 12, 1);
 gui.add(params, "Download_Image");
-function smallLine() {
+function gradientLine(Longueur) {
+    var colorStart = color('rgba(19, 100, 60,1)');
+    var colorEnd = color('rgba(19, 100, 60,0.2)');
+    for (var i = 0; i >= Longueur; i--) {
+        var c = lerpColor(colorStart, colorEnd, (1 / Longueur) * i);
+        strokeWeight(1.5);
+        stroke(c);
+        line(0, i, 0, i - 1);
+    }
+}
+function smallLine(stop) {
+    if (stop == 0) {
+        stop = 2;
+    }
+    var reduction = 0.1 * (5 + stop);
+    var longueurLigne = params.Long * random(0.7, 1) * reduction;
+    if (stop > 2) {
+        var dir = void 0;
+        if (stop % 2 == 0) {
+            dir = -1;
+        }
+        else {
+            dir = 1;
+        }
+        push();
+        var angle2 = dir * params.Angle / (stop * 2);
+        rotate(angle2);
+        smallLine(1);
+        smallLine(1);
+        pop();
+    }
     var j = 0;
     while (j < 2) {
-        line(0, 0, 0, params.Long);
+        gradientLine(longueurLigne);
         push();
         var angle = ((PI / 12) - j * (PI / 7));
-        rotate(angle);
-        line(0, 0, 0, (2 - j) * (2 / 3) * params.Long);
+        rotate(-angle);
+        gradientLine((3 - j) * (2 / 3) * longueurLigne);
         pop();
-        translate(0, params.Long);
+        translate(0, longueurLigne);
         j++;
     }
-    line(0, 0, 0, (1 / 3) * params.Long);
-    translate(0, (1 / 3) * params.Long);
+    gradientLine(longueurLigne);
+    translate(0, (1 / 2) * longueurLigne);
 }
-function divisePlant(stop) {
+function divisePlant(stop, direction) {
     push();
+    var reduction = 0.05 * (15 + stop);
+    var angle = reduction * direction * params.Angle;
+    rotate(angle);
+    smallLine(stop);
     if (stop > 1) {
-        var angle = random(-1 * params.Angle, params.Angle);
-        rotate(angle);
-        smallLine();
+        var dir = void 0;
+        if (stop % 2 == 0) {
+            dir = 1;
+        }
+        else {
+            dir = -1;
+        }
         push();
-        divisePlant(stop - 1);
+        divisePlant(stop - 1, 0);
         pop();
         push();
-        divisePlant(stop - 2);
+        divisePlant(stop - 2, dir);
         pop();
-    }
-    if (stop == 0) {
-        var angle = random(-1 * params.Angle, params.Angle);
-        rotate(angle);
-        smallLine();
     }
     if (stop == 1) {
-        var angle = random(-1 * params.Angle, params.Angle);
-        rotate(angle);
-        smallLine();
-        smallLine();
+        smallLine(stop);
     }
     pop();
 }
 function draw() {
+    image(paper, 0, 0, width, height);
     randomSeed(params.Seed);
-    background("#F4EAD3");
     noFill();
     var B = 255;
     stroke("#136428");
     translate(width / 2, 4 * height / 5);
     push();
-    var longueurArbre = 5;
-    divisePlant(longueurArbre);
+    var longueurArbre = params.PousseArbre;
+    divisePlant(longueurArbre, 0);
+    divisePlant(longueurArbre - 1, 1);
+}
+function preload() {
+    paper = loadImage("../img/paper.jpg");
 }
 function setup() {
     p6_CreateCanvas();
