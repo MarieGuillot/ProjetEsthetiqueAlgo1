@@ -96,7 +96,7 @@ function draw() {
     divisePlant(longueurArbre - 1, 1);
 }
 function preload() {
-    paper = loadImage("../img/paper.jpg");
+    paper = loadImage("img/paper.jpg");
 }
 function setup() {
     p6_CreateCanvas();
